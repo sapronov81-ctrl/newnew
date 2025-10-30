@@ -191,7 +191,7 @@ export default function App() {
     if (notes) { subtitle('Комментарии'); text(notes) }
 
     const pdfBytes = await pdfDoc.save()
-    return new Blob([pdfBytes], { type: 'application/pdf' })
+    return new Blob([pdfBytes.buffer], { type: 'application/pdf' })
   }
 
   function mark(ok: boolean | null) {
