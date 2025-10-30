@@ -97,13 +97,23 @@ export default function App() {
     const pageWidth = 595, pageHeight = 842 // A4
     const margin = 36
     // Подключаем шрифт с поддержкой кириллицы
-// ——— ШРИФТ С КИРИЛЛИЦЕЙ (встроен как base64) ———
+// ——— ШРИФТ С КИРИЛЛИЦЕЙ (встроен как base64 Roboto-Regular) ———
 const robotoBase64 = `
-AAEAAAASAQAABAAgR0RFRrRCsIIAAjWsAAAHEdQT1P9/...
-` // ← здесь длинная строка base64
-const fontBytes = Uint8Array.from(atobGlobal(robotoBase64), c => c.charCodeAt(0))
-const font = await pdfDoc.embedFont(fontBytes)
-const fontBold = font
+AAEAAAASAQAABAAgR0RFRrRCsIIAAjWsAAAHEdQT1O9Kqk0AAI2VAAA...
+<--- длинная строка шрифта base64 идёт здесь --->
+AA==`;
+
+function base64ToUint8Array(b64: string): Uint8Array {
+  const binary = (typeof window !== 'undefined' ? window.atob(b64) : Buffer.from(b64, 'base64').toString('binary'));
+  const len = binary.length;
+  const bytes = new Uint8Array(len);
+  for (let i = 0; i < len; i++) bytes[i] = binary.charCodeAt(i);
+  return bytes;
+}
+
+const fontBytes = base64ToUint8Array(robotoBase64);
+const font = await pdfDoc.embedFont(fontBytes);
+const fontBold = font;
 
     function addPage() {
       const page = pdfDoc.addPage([pageWidth, pageHeight])
