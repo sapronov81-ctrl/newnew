@@ -1,11 +1,11 @@
 {
   "name": "volkonsky-audit-render",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "private": true,
   "scripts": {
-  "dev": "next dev",
-  "build": "next build",
-  "start": "next start -p ${PORT:-3000}"
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start -p $PORT"
   },
   "dependencies": {
     "@react-pdf/renderer": "^3.4.5",
@@ -15,9 +15,9 @@
     "react-dom": "18.3.1",
     "resend": "^4.0.0"
   },
-"devDependencies": {
-  "typescript": "^5.4.5",
-  "@types/react": "^18.3.3",
-  "@types/node": "^20.11.19"
+  "devDependencies": {
+    "typescript": "^5.4.5",
+    "@types/react": "^18.3.3",
+    "@types/node": "^20.11.19"
   }
 }
