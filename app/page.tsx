@@ -131,12 +131,12 @@ async function generatePdfBlob() {
       if (!r.ok) throw new Error('Ошибка отправки отчёта')
 
       setMessage('✅ Отчёт успешно отправлен и сохранён!')
-    } catch (err) {
-      console.error(err)
-      setMessage('❌ Ошибка при создании отчёта.')
-    } finally {
-      setSending(false)
-    }
+   } catch (err: any) {
+  console.error('❌ Подробности ошибки при создании отчёта:', err)
+  setMessage('❌ Ошибка при создании отчёта: ' + (err.message || 'неизвестная ошибка'))
+} finally {
+  setSending(false)
+}
   }
 
   // ——— интерфейс ———
