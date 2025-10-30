@@ -28,18 +28,21 @@ async function generatePdfBlob() {
     const margin = 36
 
     // Универсальная загрузка шрифта (работает и в браузере, и на Render)
-    async function loadFont(path: string) {
-  const isServer = typeof window === 'undefined'
-  if (isServer) {
-    const fs = await import('fs')
-    const pathModule = await import('path')
-    // абсолютный путь относительно __dirname
-    const absPath = pathModule.join(process.cwd(), 'public', path.replace('/fonts/', 'fonts/'))
-    const data = fs.readFileSync(absPath)
-    return new Uint8Array(data)
-  } else {
-    const res = await fetch(path)
-    return new Uint8Array(await res.arrayBuffer())
+   async function loadFont(path: string) {
+  // Работает и в браузере, и на Render
+  try {
+    const url =
+      typeof window === 'undefined'
+        ? `https://newnew-aq36.onrender.com${path}`
+        : path
+
+    const res = await fetch(url)
+    if (!res.ok) throw new Error(`Не удалось загрузить шрифт: ${res.statusText}`)
+    const ab = await res.arrayBuffer()
+    return new Uint8Array(ab)
+  } catch (err) {
+    console.error('Ошибка при загрузке шрифта:', err)
+    throw err
   }
 }
 
