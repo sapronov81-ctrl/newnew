@@ -96,7 +96,14 @@ export default function App() {
     const pageWidth = 595, pageHeight = 842 // A4
     const margin = 36
     // Подключаем шрифт с поддержкой кириллицы
-const fontBytes = await fetch("/fonts/NotoSans-Regular.ttf").then(r => r.arrayBuffer())
+// ——— ШРИФТ С КИРИЛЛИЦЕЙ (встроен как base64) ———
+import { atob } from "next/dist/compiled/@edge-runtime/primitives/atob";
+
+const robotoBase64 = `
+AAEAAAASAQAABAAgR0RFRrRCsIIAAjWsAAAHEdQT1P9/...
+` // <- сюда вставляем base64 TTF (ниже я дам готовый короткий вариант)
+
+const fontBytes = Uint8Array.from(atob(robotoBase64), c => c.charCodeAt(0))
 const font = await pdfDoc.embedFont(fontBytes)
 const fontBold = font
 
