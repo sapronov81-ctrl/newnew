@@ -73,7 +73,15 @@ export default function Page() {
     }
 
     const pdfBytes = await pdfDoc.save()
-    return new Blob([pdfBytes.buffer], { type: 'application/pdf' })
+    if (typeof window === 'undefined') {
+  // SSR / Render
+  const buffer = Buffer.from(pdfBytes)
+  const blob = new Blob([buffer], { type: 'application/pdf' })
+  return blob
+} else {
+  // Браузер
+  return new Blob([new Uint8Array(pdfBytes)], { type: 'application/pdf' })
+}
   }
 
   // ——— отправка письма / сохранение PDF ———
