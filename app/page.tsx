@@ -27,12 +27,21 @@ export default function Page() {
     const margin = 36
 
     // Загружаем шрифт Roboto
-    const fontUrl = '/fonts/Roboto-Regular.ttf'
-    const fontBoldUrl = '/fonts/Roboto-Bold.ttf'
-    const [fontBytes, fontBoldBytes] = await Promise.all([
-      fetch(fontUrl).then(r => r.arrayBuffer()),
-      fetch(fontBoldUrl).then(r => r.arrayBuffer())
-    ])
+    // Универсальная загрузка шрифта — работает и на Render, и в браузере
+async function loadFont(path: string) {
+  if (typeof window === 'undefined') {
+    const fs = await import('fs')
+    const pathModule = await import('path')
+    const absPath = pathModule.resolve('./public' + path)
+    return fs.readFileSync(absPath)
+  } else {
+    const res = await fetch(path)
+    return await res.arrayBuffer()
+  }
+}
+
+const fontBytes = await loadFont('/fonts/Roboto-Regular.ttf')
+const fontBoldBytes = await loadFont('/fonts/Roboto-Bold.ttf')
     const font = await pdfDoc.embedFont(fontBytes)
     const fontBold = await pdfDoc.embedFont(fontBoldBytes)
 
