@@ -1,4 +1,5 @@
 'use client'
+const atobGlobal = (typeof window !== 'undefined' ? window.atob : (b64: string) => Buffer.from(b64, 'base64').toString('binary'))
 import { useMemo, useRef, useState } from 'react'
 import dayjs from 'dayjs'
 import { PDFDocument, StandardFonts, rgb } from 'pdf-lib'
@@ -97,13 +98,10 @@ export default function App() {
     const margin = 36
     // Подключаем шрифт с поддержкой кириллицы
 // ——— ШРИФТ С КИРИЛЛИЦЕЙ (встроен как base64) ———
-import { atob } from "next/dist/compiled/@edge-runtime/primitives/atob";
-
 const robotoBase64 = `
 AAEAAAASAQAABAAgR0RFRrRCsIIAAjWsAAAHEdQT1P9/...
-` // <- сюда вставляем base64 TTF (ниже я дам готовый короткий вариант)
-
-const fontBytes = Uint8Array.from(atob(robotoBase64), c => c.charCodeAt(0))
+` // ← здесь длинная строка base64
+const fontBytes = Uint8Array.from(atobGlobal(robotoBase64), c => c.charCodeAt(0))
 const font = await pdfDoc.embedFont(fontBytes)
 const fontBold = font
 
