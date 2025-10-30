@@ -35,21 +35,28 @@ export async function POST(req: Request) {
 
   const date = dayjs().format("DD.MM.YYYY");
 
+  // 👇 Генерация PDF без JSX
   const doc = React.createElement(
     Document,
-    {},
+    null,
     React.createElement(
       Page,
       { size: "A4", style: styles.page },
-      React.createElement(Text, { style: styles.title },
+      React.createElement(
+        Text,
+        { style: styles.title },
         `Аудит Волконский – ${payload.cafe} – ${date}`
       ),
-      React.createElement(View, { style: styles.section },
+      React.createElement(
+        View,
+        { style: styles.section },
         React.createElement(Text, { style: styles.subtitle }, "Комментарии"),
         React.createElement(Text, null, payload.notes || "—")
       ),
       photos.length > 0 &&
-        React.createElement(View, { style: styles.section },
+        React.createElement(
+          View,
+          { style: styles.section },
           React.createElement(Text, { style: styles.subtitle }, "Фото"),
           React.createElement(
             View,
@@ -106,3 +113,4 @@ export async function POST(req: Request) {
 
   return NextResponse.json({ ok: true });
 }
+
