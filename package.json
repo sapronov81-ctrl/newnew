@@ -3,9 +3,10 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "next dev -p 3000",
-    "build": "next build",
-    "start": "next start -p 3000"
+  "dev": "next dev",
+  "build": "next build",
+  "start": "next start -p $PORT"
+}
   },
   "dependencies": {
     "@react-pdf/renderer": "^3.4.5",
