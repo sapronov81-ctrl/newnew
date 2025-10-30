@@ -21,27 +21,32 @@ export default function Page() {
   }
 
   // ——— генерация PDF отчёта ———
-  async function generatePdfBlob() {
+async function generatePdfBlob() {
+  try {
     const pdfDoc = await PDFDocument.create()
     const page = pdfDoc.addPage([595, 842])
     const margin = 36
 
-    // Загружаем шрифт Roboto
-    // Универсальная загрузка шрифта — работает и на Render, и в браузере
-async function loadFont(path: string) {
-  if (typeof window === 'undefined') {
-    const fs = await import('fs')
-    const pathModule = await import('path')
-    const absPath = pathModule.resolve('./public' + path)
-    return fs.readFileSync(absPath)
-  } else {
-    const res = await fetch(path)
-    return await res.arrayBuffer()
-  }
-}
+    // Универсальная загрузка шрифта (работает и в браузере, и на Render)
+    async function loadFont(path: string) {
+      if (typeof window === 'undefined') {
+        const fs = await import('fs')
+        const pathModule = await import('path')
+        const absPath = pathModule.resolve('./public' + path)
+        const data = fs.readFileSync(absPath)
+        return new Uint8Array(data)
+      } else {
+        const res = await fetch(path)
+        const ab = await res.arrayBuffer()
+        return new Uint8Array(ab)
+      }
+    }
 
-const fontBytes = await loadFont('/fonts/Roboto-Regular.ttf')
-const fontBoldBytes = await loadFont('/fonts/Roboto-Bold.ttf')
+    const [fontBytes, fontBoldBytes] = await Promise.all([
+      loadFont('/fonts/Roboto-Regular.ttf'),
+      loadFont('/fonts/Roboto-Bold.ttf')
+    ])
+
     const font = await pdfDoc.embedFont(fontBytes)
     const fontBold = await pdfDoc.embedFont(fontBoldBytes)
 
@@ -62,7 +67,7 @@ const fontBoldBytes = await loadFont('/fonts/Roboto-Bold.ttf')
     y -= 20
     page.drawText(notes || '—', { x: margin, y, size: 12, font })
 
-    // Фото (миниатюры)
+    // Добавляем фото (если есть)
     if (photos.length > 0) {
       y -= 80
       page.drawText('Фото:', { x: margin, y, size: 12, font: fontBold })
@@ -70,9 +75,15 @@ const fontBoldBytes = await loadFont('/fonts/Roboto-Bold.ttf')
       let x = margin
       for (const file of photos) {
         const bytes = await file.arrayBuffer()
-        const img = await pdfDoc.embedJpg(bytes).catch(() => pdfDoc.embedPng(bytes))
-        const { width, height: imgH } = img.scale(80 / img.width)
-        page.drawImage(img, { x, y: y - 60, width, height: imgH })
+        try {
+          const img = await pdfDoc.embedJpg(bytes)
+          const scaled = img.scale(80 / img.width)
+          page.drawImage(img, { x, y: y - 60, width: scaled.width, height: scaled.height })
+        } catch {
+          const img = await pdfDoc.embedPng(bytes)
+          const scaled = img.scale(80 / img.width)
+          page.drawImage(img, { x, y: y - 60, width: scaled.width, height: scaled.height })
+        }
         x += 90
         if (x > 480) {
           x = margin
@@ -82,16 +93,19 @@ const fontBoldBytes = await loadFont('/fonts/Roboto-Bold.ttf')
     }
 
     const pdfBytes = await pdfDoc.save()
+    // Универсальное создание Blob
     if (typeof window === 'undefined') {
-  // SSR / Render
-  const buffer = Buffer.from(pdfBytes)
-  const blob = new Blob([buffer], { type: 'application/pdf' })
-  return blob
-} else {
-  // Браузер
-  return new Blob([new Uint8Array(pdfBytes)], { type: 'application/pdf' })
-}
+      const buffer = Buffer.from(pdfBytes)
+      return new Blob([buffer], { type: 'application/pdf' })
+    } else {
+      return new Blob([new Uint8Array(pdfBytes)], { type: 'application/pdf' })
+    }
+  } catch (err) {
+    console.error('Ошибка при генерации PDF:', err)
+    throw err
   }
+}
+
 
   // ——— отправка письма / сохранение PDF ———
   async function handleSubmit(e: React.FormEvent) {
