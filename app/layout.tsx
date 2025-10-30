@@ -9,12 +9,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body
         style={{
           margin: 0,
-          fontFamily: 'system-ui, -apple-system, Segoe UI, Roboto, sans-serif',
-          background: '#F7F3EE',
-          color: '#2B1D17'
+          background: '#F8F8F8',
+          color: '#1C1C1E',
+          fontFamily: 'system-ui, -apple-system, Segoe UI, Roboto, sans-serif'
         }}
       >
-        {children}
+        <div style={{maxWidth: 900, margin: '0 auto'}}>{children}</div>
       </body>
     </html>
   );
