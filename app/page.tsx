@@ -128,14 +128,13 @@ export default function Page() {
       page.drawLine({ start: {x: margin, y: y-2}, end: {x: W - margin, y: y-2}, color: hex(ACCENT), thickness: 0.7 })
     }
     function ensureSpace(min: number) {
-      if (y < margin + min) {
-        pdfDoc.addPage([595, 842])
-        const p = pdfDoc.getPages().at(-1)!
-        page.setSize(p.getSize())
-        ;(page as any) = p
-        y = H - margin
-      }
-    }
+  if (y < margin + min) {
+    const newPage = pdfDoc.addPage([595, 842])
+    // переназначаем ссылку на новую страницу
+    ;(page as any) = newPage
+    y = H - margin
+  }
+}
     async function addImages(section: string, files: File[]) {
       if (!files?.length) return
       ensureSpace(140)
