@@ -514,6 +514,16 @@ const drinkRu: Record<string,string> = {
 }
 
 /** ====== Утилита цвета HEX → rgb() ====== */
+function sectionRu(key: string): string {
+  const map: Record<string, string> = {
+    cleanliness: 'Чистота',
+    expiry: 'Сроки годности и маркировка',
+    standards: 'Стандарты работы',
+    espresso: 'Эспрессо',
+    drinks: 'Напитки',
+  }
+  return map[key] || key
+}
 function hex(hexColor: string) {
   const v = hexColor.replace('#','')
   const r = parseInt(v.slice(0,2),16)/255
