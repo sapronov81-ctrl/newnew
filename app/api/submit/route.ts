@@ -69,7 +69,16 @@ export async function POST(req: Request) {
     )
   );
 
-  const buffer = await pdf(doc).toBuffer();
+   // Конвертируем PDF в Base64 вручную
+  const stream = await pdf(doc).toBuffer();
+  const chunks: Uint8Array[] = [];
+
+  // Превращаем ReadableStream в Buffer
+  for await (const chunk of stream as any) {
+    chunks.push(chunk);
+  }
+  const buffer = Buffer.concat(chunks);
+  const base64 = buffer.toString("base64");
 
   const resend = new Resend(process.env.RESEND_API_KEY);
   const toList = String(payload.recipients)
@@ -103,7 +112,7 @@ export async function POST(req: Request) {
     attachments: [
       {
         filename: `Audit_${payload.cafe}_${date}.pdf`,
-        content: Buffer.from(buffer).toString("base64"),
+        content: base64,
       },
     ],
   });
@@ -113,4 +122,3 @@ export async function POST(req: Request) {
 
   return NextResponse.json({ ok: true });
 }
-
