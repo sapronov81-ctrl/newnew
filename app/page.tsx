@@ -95,8 +95,10 @@ export default function App() {
     const pdfDoc = await PDFDocument.create()
     const pageWidth = 595, pageHeight = 842 // A4
     const margin = 36
-    const font = await pdfDoc.embedFont(StandardFonts.Helvetica)
-    const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold)
+    // Подключаем шрифт с поддержкой кириллицы
+const fontBytes = await fetch("/fonts/NotoSans-Regular.ttf").then(r => r.arrayBuffer())
+const font = await pdfDoc.embedFont(fontBytes)
+const fontBold = font
 
     function addPage() {
       const page = pdfDoc.addPage([pageWidth, pageHeight])
