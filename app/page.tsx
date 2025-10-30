@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { PDFDocument, rgb } from 'pdf-lib'
+import fontkit from "@pdf-lib/fontkit";
 import dayjs from 'dayjs'
 
 export default function Page() {
@@ -24,7 +25,6 @@ export default function Page() {
 async function generatePdfBlob() {
   try {
     const pdfDoc = await PDFDocument.create()
-    import fontkit from '@pdf-lib/fontkit'
 pdfDoc.registerFontkit(fontkit)
     const page = pdfDoc.addPage([595, 842])
     const margin = 36
