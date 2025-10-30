@@ -103,7 +103,7 @@ export async function POST(req: Request) {
     attachments: [
       {
         filename: `Audit_${payload.cafe}_${date}.pdf`,
-        content: buffer.toString("base64"),
+        content: Buffer.from(buffer).toString("base64"),
       },
     ],
   });
