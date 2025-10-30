@@ -1,4 +1,3 @@
-/** @jsxImportSource react */
 import React from "react";
 import { NextResponse } from "next/server";
 import { pdf, Document, Page, Text, View, StyleSheet, Image } from "@react-pdf/renderer";
@@ -18,13 +17,15 @@ const styles = StyleSheet.create({
 export async function POST(req: Request) {
   const form = await req.formData();
   const payloadStr = form.get("payload") as string | null;
-  if (!payloadStr) return new NextResponse("payload required", { status: 400 });
-  const payload = JSON.parse(payloadStr);
+  if (!payloadStr)
+    return new NextResponse("payload required", { status: 400 });
 
+  const payload = JSON.parse(payloadStr);
   const photos: string[] = [];
-  for (const [k, v] of form.entries()) {
-    if (k.startsWith("photo")) {
-      const file = v as File;
+
+  for (const [key, value] of form.entries()) {
+    if (key.startsWith("photo")) {
+      const file = value as File;
       const ab = await file.arrayBuffer();
       const base64 = Buffer.from(ab).toString("base64");
       const mime = file.type || "image/jpeg";
@@ -32,29 +33,33 @@ export async function POST(req: Request) {
     }
   }
 
-  const date = dayjs(new Date()).format("DD.MM.YYYY");
-  const doc = (
-    <Document>
-      <Page size="A4" style={styles.page}>
-        <Text style={styles.title}>
-          Аудит Волконский – {payload.cafe} – {date}
-        </Text>
-        <View style={styles.section}>
-          <Text style={styles.subtitle}>Комментарии</Text>
-          <Text>{payload.notes || "—"}</Text>
-        </View>
-        {photos.length > 0 && (
-          <View style={styles.section}>
-            <Text style={styles.subtitle}>Фото</Text>
-            <View style={{ flexDirection: "row", flexWrap: "wrap" }}>
-              {photos.map((src, i) => (
-                <Image key={i} style={styles.img} src={src} />
-              ))}
-            </View>
-          </View>
-        )}
-      </Page>
-    </Document>
+  const date = dayjs().format("DD.MM.YYYY");
+
+  const doc = React.createElement(
+    Document,
+    {},
+    React.createElement(
+      Page,
+      { size: "A4", style: styles.page },
+      React.createElement(Text, { style: styles.title },
+        `Аудит Волконский – ${payload.cafe} – ${date}`
+      ),
+      React.createElement(View, { style: styles.section },
+        React.createElement(Text, { style: styles.subtitle }, "Комментарии"),
+        React.createElement(Text, null, payload.notes || "—")
+      ),
+      photos.length > 0 &&
+        React.createElement(View, { style: styles.section },
+          React.createElement(Text, { style: styles.subtitle }, "Фото"),
+          React.createElement(
+            View,
+            { style: { flexDirection: "row", flexWrap: "wrap" } },
+            photos.map((src, i) =>
+              React.createElement(Image, { key: i, style: styles.img, src })
+            )
+          )
+        )
+    )
   );
 
   const buffer = await pdf(doc).toBuffer();
@@ -64,20 +69,26 @@ export async function POST(req: Request) {
     .split(",")
     .map((s: string) => s.trim())
     .filter(Boolean);
+
   if (toList.length === 0)
     return new NextResponse("recipients required", { status: 400 });
 
   const subject = `Новый отчёт об аудите: ${payload.cafe}, ${date}`;
-  const from = process.env.FROM_EMAIL || "Аудит Волконский <onboarding@resend.dev>";
+  const from =
+    process.env.FROM_EMAIL ||
+    "Аудит Волконский <onboarding@resend.dev>";
   const auditor = process.env.AUDITOR_NAME || "Аудитор";
-  const html = `<div style="font-family:system-ui,-apple-system,Segoe UI,Roboto">
-    <p>Добрый день!</p>
-    <p>Новый отчёт об аудите: <b>${payload.cafe}</b>, ${date}.</p>
-    <p>В приложении — PDF с результатами проверки и фото.</p>
-    <p>С уважением,<br/>${auditor}</p>
-  </div>`;
 
-  const r = await resend.emails.send({
+  const html = `
+    <div style="font-family:system-ui,-apple-system,Segoe UI,Roboto">
+      <p>Добрый день!</p>
+      <p>Новый отчёт об аудите: <b>${payload.cafe}</b>, ${date}.</p>
+      <p>В приложении — PDF с результатами проверки и фото.</p>
+      <p>С уважением,<br/>${auditor}</p>
+    </div>
+  `;
+
+  const result = await resend.emails.send({
     from,
     to: toList,
     subject,
@@ -90,6 +101,8 @@ export async function POST(req: Request) {
     ],
   });
 
-  if (r.error) return new NextResponse(String(r.error), { status: 500 });
+  if (result.error)
+    return new NextResponse(String(result.error), { status: 500 });
+
   return NextResponse.json({ ok: true });
 }
